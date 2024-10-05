@@ -1,0 +1,255 @@
+openapi: 3.0.1
+info:
+  title: API для управления коллекцией продуктов. Вариант 4197.
+  description: API для управления коллекцией объектов класса `Product`. Второй сервис.
+  version: 1.0.0
+servers:
+- url: https://se.ifmo.ru/~s333165/SOA/
+  description: Королев Денис
+- url: https://se.ifmo.ru/~s308414/SOA/
+  description: Арсений Девяткин
+paths:
+  /ebay/filter/manufacturer/{manufacturerId}:
+    get:
+      summary: Получить все продукты по ID производителя
+      tags: 
+      - Дополнительные операции
+      operationId: filterByManufacturer
+      parameters:
+      - name: manufacturerId
+        in: path
+        description: Идентификатор производителя
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Продукты успешно получены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              example:
+              - id: 1
+                name: Product 1
+                coordinates:
+                  x: 10
+                  "y": 20.5
+                creationDate: 2023-10-01T12:00:00Z
+                price: 500
+                partNumber: A123
+                manufactureCost: 1000
+                unitOfMeasure: GRAMS
+                owner:
+                  name: John Doe
+                  birthday: 1990-01-01T00:00:00Z
+                  height: 180
+                  passportID: "123456"
+                  location:
+                    x: 50.123
+                    "y": 10.456
+                    name: Moscow
+        "400":
+          description: Неверно указан ID производителя — должен быть положительным числом
+          content:
+            application/json:
+              example:
+                code: 400
+                message: "Неверно указан ID производителя: должен быть положительным числом."
+        "401":
+          description: Отказ в доступе — требуется авторизация
+          content:
+            application/json:
+              example:
+                code: 401
+                message: "Доступ запрещен: требуется авторизация."
+        "403":
+          description: Запрещено — у вас нет прав на доступ к этому ресурсу
+          content:
+            application/json:
+              example:
+                code: 403
+                message: "Запрещено: у вас нет прав на доступ к этому ресурсу."
+        "404":
+          description: Продукты с указанным производителем не найдены
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Продукты с указанным производителем не найдены.
+        "408":
+          description: Время ожидания истекло — запрос не был обработан вовремя
+          content:
+            application/json:
+              example:
+                code: 408
+                message: "Время ожидания истекло: запрос не был обработан вовремя."
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Внутренняя ошибка сервера
+        "503":
+          description: Сервис временно недоступен — попробуйте позже
+          content:
+            application/json:
+              example:
+                code: 503
+                message: "Сервис временно недоступен: попробуйте позже."
+        "504":
+          description: Ошибка шлюза — не удалось получить ответ от внешнего сервиса
+          content:
+            application/json:
+              example:
+                code: 504
+                message: "Ошибка шлюза: не удалось получить ответ от внешнего сервиса."
+  /ebay/price/decrease/{decreasePercent}:
+    post:
+      summary: Снизить цену на указанный процент
+      tags: 
+      - Дополнительные операции
+      operationId: decreasePrice
+      parameters:
+      - name: decreasePercent
+        in: path
+        description: Процент уменьшения цены
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+          format: float
+      responses:
+        "200":
+          description: Цены успешно обновлены
+          content:
+            application/json:
+               example:
+                code: 200
+                message: "Цены успешно обновлены."
+        "400":
+          description: Неверно указан процент уменьшения — процент должен быть положительным числом
+          content:
+            application/json:
+              example:
+                code: 400
+                message: "Неверно указан процент уменьшения: процент должен быть положительным числом."
+        "401":
+          description: Отказ в доступе — требуется авторизация
+          content:
+            application/json:
+              example:
+                code: 401
+                message: "Доступ запрещен: требуется авторизация."
+        "403":
+          description: Запрещено — у вас нет прав на доступ к этому ресурсу
+          content:
+            application/json:
+              example:
+                code: 403
+                message: "Запрещено: у вас нет прав на доступ к этому ресурсу."
+        "404":
+          description: Продукты для снижения цены не найдены
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Продукты для снижения цены не найдены.
+        "409":
+          description: "Конфликт — не удается снизить цену, так как продукт не может быть уценен"
+          content:
+            application/json:
+              example:
+                code: 409
+                message: "Конфликт: не удается снизить цену, так как продукт не может быть уценен."
+        "500":
+          description: Внутренняя ошибка сервера
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Внутренняя ошибка сервера.
+        "503":
+          description: Сервис временно недоступен — попробуйте позже
+          content:
+            application/json:
+              example:
+                code: 503
+                message: "Сервис временно недоступен: попробуйте позже."
+        "504":
+          description: Ошибка шлюза — не удалось получить ответ от внешнего сервиса
+          content:
+            application/json:
+              example:
+                code: 504
+                message: "Ошибка шлюза: не удалось получить ответ от внешнего сервиса."
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        creationDate:
+          type: string
+          format: date-time
+        price:
+          type: integer
+          nullable: true
+        partNumber:
+          type: string
+        manufactureCost:
+          type: integer
+        unitOfMeasure:
+          $ref: '#/components/schemas/UnitOfMeasure'
+        owner:
+          $ref: '#/components/schemas/Person'
+    Coordinates:
+      type: object
+      properties:
+        x:
+          type: number
+        "y":
+          type: number
+    Person:
+      type: object
+      properties:
+        name:
+          type: string
+        birthday:
+          type: string
+          format: date-time
+        height:
+          type: integer
+          nullable: true
+        passportID:
+          type: string
+          nullable: true
+        location:
+          $ref: '#/components/schemas/Location'
+    Location:
+      type: object
+      properties:
+        x:
+          type: number
+        "y":
+          type: number
+        name:
+          type: string
+    UnitOfMeasure:
+      type: string
+      enum:
+      - METERS
+      - CENTIMETERS
+      - MILLILITERS
+      - GRAMS

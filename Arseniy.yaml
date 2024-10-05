@@ -1,0 +1,579 @@
+openapi: 3.0.1
+info:
+  title: API для управления коллекцией продуктов. Вариант 4197.
+  description: API для управления коллекцией объектов класса `Product`. Первый сервис. 
+  version: 1.0.0
+servers:
+- url: https://se.ifmo.ru/~s308414/SOA/
+  description: Арсений Девяткин
+- url: https://se.ifmo.ru/~s333165/SOA/
+  description: Королев Денис
+paths:
+  /products:
+    get:
+      tags:
+      - Базовый набор операций
+      summary: "Получить все продукты с возможностью фильтрации, сортировки и пагинации"
+      operationId: getAllProducts
+      parameters:
+      - name: filter
+        in: query
+        description: "Параметры фильтрации (например, `name`, `price` и т.д.)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: sort
+        in: query
+        description: "Сортировка по полю (например, `name`, `price`)."
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      - name: page
+        in: query
+        description: Номер страницы для пагинации.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      - name: size
+        in: query
+        description: Размер страницы для пагинации.
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Продукты успешно получены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              example:
+              - id: 1
+                name: Product 1
+                coordinates:
+                  x: 10
+                  "y": 20.5
+                creationDate: 2023-10-01T12:00:00Z
+                price: 500
+                partNumber: A123
+                manufactureCost: 1000
+                unitOfMeasure: GRAMS
+                owner:
+                  name: John Doe
+                  birthday: 1990-01-01T00:00:00Z
+                  height: 180
+                  passportID: "123456"
+                  location:
+                    x: 50.123
+                    "y": 10.456
+                    name: Moscow
+        "400":
+          description: Неверно указаны параметры фильтрации или сортировки
+          content:
+            application/json:
+              example:
+                code: 400
+                message: "Неверный параметр сортировки: 'pricee'. Должно быть 'price'."
+        "404":
+          description: Продукты не найдены
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Продукты не найдены по указанным параметрам.
+        "500":
+          description: "Внутренняя ошибка сервера — проблемы с сервером, которые мешают обработать запрос"
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Внутренняя ошибка сервера. Попробуйте позже.
+    post:
+      tags:
+      - Базовый набор операций
+      summary: Добавить новый продукт
+      operationId: createProduct
+      requestBody:
+        description: "Объект продукта, который нужно добавить"
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+            example:
+              name: New Product
+              coordinates:
+                x: 15
+                "y": 25.5
+              price: 1000
+              partNumber: B456
+              manufactureCost: 500
+              unitOfMeasure: CENTIMETERS
+              owner:
+                name: Jane Doe
+                birthday: 1985-05-05T00:00:00Z
+                height: 170
+                passportID: "654321"
+                location:
+                  x: 60.123
+                  "y": 20.456
+                  name: Saint Petersburg
+        required: true
+      responses:
+        "201":
+          description: Продукт успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+              example:
+                id: 2
+                name: New Product
+                coordinates:
+                  x: 15
+                  "y": 25.5
+                creationDate: 2023-10-04T14:00:00Z
+                price: 1000
+                partNumber: B456
+                manufactureCost: 500
+                unitOfMeasure: CENTIMETERS
+                owner:
+                  name: Jane Doe
+                  birthday: 1985-05-05T00:00:00Z
+                  height: 170
+                  passportID: "654321"
+                  location:
+                    x: 60.123
+                    "y": 20.456
+                    name: Saint Petersburg
+        "400":
+          description: Данные продукта некорректны или отсутствуют обязательные поля
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Поле 'name' не может быть пустым.
+        "409":
+          description: Продукт с таким ID или номером детали уже существует
+          content:
+            application/json:
+              example:
+                code: 409
+                message: Продукт с номером детали 'B456' уже существует.
+        "500":
+          description: Внутренняя ошибка сервера — проблемы с базой данных или генерацией ID
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Ошибка при генерации ID. Попробуйте снова.
+  /products/{id}:
+    get:
+      tags:
+      - Базовый набор операций
+      summary: Получить продукт по ID
+      operationId: getProductById
+      parameters:
+      - name: id
+        in: path
+        description: Идентификатор продукта
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Продукт успешно получен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+              example:
+                id: 1
+                name: Product 1
+                coordinates:
+                  x: 10
+                  "y": 20.5
+                creationDate: 2023-10-01T12:00:00Z
+                price: 500
+                partNumber: A123
+                manufactureCost: 1000
+                unitOfMeasure: GRAMS
+                owner:
+                  name: John Doe
+                  birthday: 1990-01-01T00:00:00Z
+                  height: 180
+                  passportID: "123456"
+                  location:
+                    x: 50.123
+                    "y": 10.456
+                    name: Moscow
+        "400":
+          description: Неверно указан ID продукта — он должен быть числом больше 0
+          content:
+            application/json:
+              example:
+                code: 400
+                message: ID должен быть положительным числом.
+        "404":
+          description: Продукт с указанным ID не найден
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Продукт с ID '10' не найден.
+        "500":
+          description: Внутренняя ошибка сервера — проблемы с доступом к базе данных
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Ошибка при обращении к базе данных.
+    put:
+      tags:
+      - Базовый набор операций
+      summary: Обновить существующий продукт
+      operationId: updateProduct
+      parameters:
+      - name: id
+        in: path
+        description: Идентификатор продукта
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      requestBody:
+        description: Обновляемый объект продукта
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Product'
+            example:
+              name: Updated Product
+              coordinates:
+                x: 30
+                "y": 40.5
+              price: 1200
+              partNumber: C789
+              manufactureCost: 600
+              unitOfMeasure: METERS
+              owner:
+                name: John Smith
+                birthday: 1980-12-12T00:00:00Z
+                height: 185
+                passportID: "987654"
+                location:
+                  x: 70.123
+                  "y": 30.456
+                  name: Novosibirsk
+        required: true
+      responses:
+        "200":
+          description: Продукт успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+              example:
+                id: 3
+                name: Updated Product
+                coordinates:
+                  x: 30
+                  "y": 40.5
+                creationDate: 2023-10-02T12:00:00Z
+                price: 1200
+                partNumber: C789
+                manufactureCost: 600
+                unitOfMeasure: METERS
+                owner:
+                  name: John Smith
+                  birthday: 1980-12-12T00:00:00Z
+                  height: 185
+                  passportID: "987654"
+                  location:
+                    x: 70.123
+                    "y": 30.456
+                    name: Novosibirsk
+        "400":
+          description: Неверные данные продукта или ID не соответствует существующему продукту
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Поле 'name' не может быть пустым.
+        "404":
+          description: Продукт с указанным ID не найден
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Продукт с ID '5' не найден.
+        "500":
+          description: Внутренняя ошибка сервера — проблемы с базой данных
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Ошибка при обновлении продукта в базе данных.
+    delete:
+      tags:
+      - Базовый набор операций
+      summary: Удалить продукт по ID
+      operationId: deleteProduct
+      parameters:
+      - name: id
+        in: path
+        description: Идентификатор продукта
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Продукт успешно удален
+          content:
+            application/json:
+              example:
+                code: 200
+                message: Продукт с ID '5' успешно удален.
+        "404":
+          description: Продукт с указанным ID не найден
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Продукт с ID '5' не найден.
+        "500":
+          description: Внутренняя ошибка сервера — проблемы с удалением продукта
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Ошибка при удалении продукта из базы данных.
+  /products/owner/{ownerId}/count:
+    get:
+      summary: Получить количество продуктов с указанным владельцем
+      tags: 
+      - Дополнительные операции
+      operationId: countByOwner
+      parameters:
+      - name: ownerId
+        in: path
+        description: Идентификатор владельца
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: Количество продуктов успешно получено
+          content:
+            application/json:
+              schema:
+                type: integer
+              example: 10
+        "400":
+          description: Неверно указан ID владельца — должен быть положительным числом
+          content:
+            application/json:
+              example:
+                code: 400
+                message: "Неверно указан ID владельца: должен быть положительным числом."
+        "404":
+          description: Продукты с указанным владельцем не найдены
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Продукты с указанным владельцем не найдены.
+        "500":
+          description: Внутренняя ошибка сервера — проблемы с доступом к базе данных
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Ошибка доступа к базе данных при получении количества продуктов.
+  /products/unitOfMeasure/{unit}/count:
+    get:
+      summary: "Получить количество продуктов с единицей измерения, больше указанной"
+      tags: 
+      - Дополнительные операции
+      operationId: countByUnitOfMeasure
+      parameters:
+      - name: unit
+        in: path
+        description: Единица измерения
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+          enum:
+          - METERS
+          - CENTIMETERS
+          - MILLILITERS
+          - GRAMS
+      responses:
+        "200":
+          description: Количество продуктов успешно получено
+          content:
+            application/json:
+              schema:
+                type: integer
+              example: 15
+        "400":
+          description: "Неверно указана единица измерения — допустимые значения: METERS, CENTIMETERS, MILLILITERS, GRAMS"
+          content:
+            application/json:
+              example:
+                code: 400
+                message: "Неверно указана единица измерения: допустимые значения METERS, CENTIMETERS, MILLILITERS, GRAMS."
+        "404":
+          description: Продукты с указанной единицей измерения не найдены
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Продукты с указанной единицей измерения не найдены.
+        "500":
+          description: Внутренняя ошибка сервера — проблемы с фильтрацией данных
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Ошибка фильтрации данных при получении количества продуктов.
+  /products/partNumber/search:
+    get:
+      summary: Поиск продуктов по подстроке номера детали
+      tags: 
+      - Дополнительные операции
+      operationId: searchByPartNumber
+      parameters:
+      - name: substring
+        in: query
+        description: Подстрока номера детали
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Продукты успешно найдены
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+              example:
+              - id: 1
+                name: Продукт 1
+                partNumber: PN123
+              - id: 2
+                name: Продукт 2
+                partNumber: PN124
+        "400":
+          description: Неверно указана подстрока номера детали — строка не может быть пустой
+          content:
+            application/json:
+              example:
+                code: 400
+                message: "Неверно указана подстрока номера детали: строка не может быть пустой."
+        "404":
+          description: Продукты с указанной подстрокой не найдены
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Продукты с указанной подстрокой не найдены.
+        "500":
+          description: Внутренняя ошибка сервера — проблемы с поиском данных
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Ошибка при поиске данных в базе.
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          uniqueItems: true
+          nullable: false
+        name:
+          type: string
+          nullable: false
+          minLength: 1
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+          nullable: false
+        creationDate:
+          type: string
+          format: date-time
+        price:
+          type: integer
+          nullable: true
+        partNumber:
+          type: string
+        manufactureCost:
+          type: integer
+        unitOfMeasure:
+          $ref: '#/components/schemas/UnitOfMeasure'
+        owner:
+          $ref: '#/components/schemas/Person'
+    Coordinates:
+      type: object
+      properties:
+        x:
+          type: number
+        "y":
+          type: number
+    Person:
+      type: object
+      properties:
+        name:
+          type: string
+        birthday:
+          type: string
+          format: date-time
+        height:
+          type: integer
+          nullable: true
+        passportID:
+          type: string
+          nullable: true
+        location:
+          $ref: '#/components/schemas/Location'
+    Location:
+      type: object
+      properties:
+        x:
+          type: number
+        "y":
+          type: number
+        name:
+          type: string
+    UnitOfMeasure:
+      type: string
+      enum:
+      - METERS
+      - CENTIMETERS
+      - MILLILITERS
+      - GRAMS
